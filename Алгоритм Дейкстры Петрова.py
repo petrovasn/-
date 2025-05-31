@@ -1,6 +1,5 @@
 import sys
 
-
 def dijkstra(graph, start_vertex):
     num_vertices = len(graph)
 
@@ -10,6 +9,9 @@ def dijkstra(graph, start_vertex):
 
     # Массив для отслеживания посещённых вершин
     visited = [False] * num_vertices
+
+    # Массив для хранения предыдущих вершин на кратчайшем пути
+    previous_vertices = [None] * num_vertices
 
     for _ in range(num_vertices):
         # Выбираем вершину с минимальным расстоянием
@@ -33,9 +35,18 @@ def dijkstra(graph, start_vertex):
                 new_distance = shortest_distances[min_vertex] + graph[min_vertex][neighbor]
                 if new_distance < shortest_distances[neighbor]:
                     shortest_distances[neighbor] = new_distance
+                    previous_vertices[neighbor] = min_vertex  # Сохраняем путь
 
-    return shortest_distances
+    return shortest_distances, previous_vertices
 
+def get_shortest_path(previous_vertices, start_vertex, end_vertex):
+    path = []
+    current_vertex = end_vertex
+    while current_vertex is not None:
+        path.append(current_vertex)
+        current_vertex = previous_vertices[current_vertex]
+    path.reverse()  # Путь построен в обратном порядке
+    return path
 
 # Пример использования
 
@@ -49,7 +60,11 @@ graph = [
 ]
 # Запуск алгоритма
 start_vertex = 0
-shortest_paths = dijkstra(graph, start_vertex)
+shortest_distances, previous_vertices = dijkstra(graph, start_vertex)
 
 # Вывод результата
-print("Кратчайшие расстояния от вершины", start_vertex, ":", shortest_paths)
+print("Кратчайшие расстояния от вершины", start_vertex, ":", shortest_distances)
+for end_vertex in range(len(graph)):
+    if end_vertex != start_vertex and shortest_distances[end_vertex] != sys.maxsize:
+        path = get_shortest_path(previous_vertices, start_vertex, end_vertex)
+        print(f"Кратчайший путь от вершины {start_vertex} до вершины {end_vertex}: {path}, расстояние: {shortest_distances[end_vertex]}")
